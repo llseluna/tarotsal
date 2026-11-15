@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQ Project</title>
+<style>
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #111116;
+  color: #f5f1fa;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
+.container {
+  width: 100%;
+  max-width: 420px;
+  background: #1c1b24;
+  padding: 30px 22px;
+  border: 1px solid #393342;
+  border-radius: 22px;
+}
+.tag {
+  color: #c5a5ef;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-align: center;
+}
+h1 {
+  text-align: center;
+  font-size: 32px;
+  margin: 15px 0 8px;
+}
+.description {
+  text-align: center;
+  color: #aaa3b5;
+  line-height: 1.6;
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+label {
+  display: block;
+  margin: 16px 0 8px;
+  font-size: 13px;
+  color: #d8cce7;
+}
+input, textarea {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #494151;
+  background: #111116;
+  color: white;
+  border-radius: 11px;
+  font-size: 15px;
+  outline: none;
+}
+textarea {
+  resize: vertical;
+  min-height: 105px;
+}
+button {
+  width: 100%;
+  padding: 15px;
+  margin-top: 20px;
+  border: 0;
+  border-radius: 11px;
+  background: #b99ade;
+  color: #17121d;
+  font-weight: bold;
+  font-size: 15px;
+}
+button:active {
+  opacity: .8;
+}
+#result {
+  display: none;
+  margin-top: 22px;
+  padding: 18px;
+  text-align: center;
+  border-radius: 13px;
+  background: #30263b;
+}
+#number {
+  display: block;
+  font-size: 38px;
+  color: #d5b7ff;
+  margin: 10px;
+}
+.footer {
+  text-align: center;
+  color: #777181;
+  font-size: 11px;
+  margin-top: 25px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="tag">SQ PROJECT</div>
+  <h1>Soru Sırası</h1>
+  <p class="description">
+    Sorunu gönder ve sıradaki yerini öğren
+  </p>
+
+  <form id="queueForm">
+    <label>Kullanıcı adın</label>
+    <input id="username" placeholder="Kullanıcı adını yaz" maxlength="25" required>
+
+    <label>Sorun</label>
+    <textarea id="question" placeholder="Sorunu buraya yaz..." maxlength="500" required></textarea>
+
+    <button type="submit">Sıraya Katıl</button>
+  </form>
+
+  <div id="result">
+    Sıraya başarıyla eklendin
+    <span id="number">#1</span>
+    <small>Sıra numaran</small>
+  </div>
+
+  <div class="footer">SQ PROJECT · 2026</div>
+</div>
+
+<script>
+const form = document.getElementById("queueForm");
+const result = document.getElementById("result");
+
+form.addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const username = document.getElementById("username").value.trim();
+  const question = document.getElementById("question").value.trim();
+
+  if (!username || !question) return;
+
+  let queue = JSON.parse(localStorage.getItem("sqQueue") || "[]");
+
+  const exists = queue.some(
+    item => item.username.toLowerCase() === username.toLowerCase()
+  );
+
+  if (exists) {
+    alert("Bu kullanıcı adı zaten sırada!");
+    return;
+  }
+
+  queue.push({
+    username: username,
+    question: question
+  });
+
+  localStorage.setItem("sqQueue", JSON.stringify(queue));
+
+  document.getElementById("number").textContent = "#" + queue.length;
+  result.style.display = "block";
+  form.reset();
+});
+</script>
+
+</body>
+</html>
