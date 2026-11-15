@@ -1,0 +1,226 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarotsal | Yönetim Paneli</title>
+<style>
+*{box-sizing:border-box}
+body{
+margin:0;
+min-height:100vh;
+background:#100d16;
+color:#f4eafa;
+font-family:Arial,sans-serif;
+padding:25px 16px;
+}
+.container{max-width:650px;margin:40px auto}
+h1{
+text-align:center;
+font-family:Georgia,serif;
+font-size:42px;
+letter-spacing:5px;
+color:#dfc2f5;
+}
+.subtitle{text-align:center;color:#aa91b9;font-size:12px;letter-spacing:3px}
+.card{
+background:#201729;
+border:1px solid #59436b;
+border-radius:16px;
+padding:24px;
+margin-top:25px;
+}
+h2{text-align:center;font-family:Georgia,serif}
+input{
+width:100%;
+padding:14px;
+margin:10px 0;
+background:#15101c;
+border:1px solid #59436b;
+border-radius:9px;
+color:white;
+}
+button{
+padding:13px;
+border:0;
+border-radius:9px;
+background:#80569c;
+color:white;
+cursor:pointer;
+font-weight:bold;
+}
+#login button{width:100%;margin-top:12px}
+.entry{
+background:#17111f;
+border:1px solid #59436b;
+border-radius:12px;
+padding:18px;
+margin-top:15px;
+}
+.entry p{color:#c9b7d4;line-height:1.6}
+.small{font-size:12px;color:#aa91b9}
+.actions{display:flex;gap:10px;align-items:center}
+.actions button{flex:1}
+.hidden{display:none}
+#message{text-align:center;color:#d9b9ed;margin-top:15px}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>TAROTSAL</h1>
+<div class="subtitle">ADMINISTRATION PANEL</div>
+
+<div class="card" id="login">
+<h2>Yönetici Girişi</h2>
+<input id="email" type="email" placeholder="E-posta adresin">
+<input id="password" type="password" placeholder="Şifren">
+<button id="loginBtn">GİRİŞ YAP</button>
+<div id="message"></div>
+</div>
+
+<div class="card hidden" id="dashboard">
+<h2>Gelen Tarot Soruları</h2>
+<p class="small" id="welcome"></p>
+<button id="refresh">YENİLE</button>
+<div id="entries"></div>
+<button id="logout" style="width:100%;margin-top:20px">ÇIKIŞ YAP</button>
+</div>
+</div>
+
+<script type="module">
+import { createClient } from
+"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+const supabase = createClient(
+"https://rxcjcnrhbeekpnoybmcc.supabase.co",
+"sb_publishable_mCBKaVjUDhU-lSwnnbheWw_TO93nm4n"
+);
+
+const ADMIN_ID = "16dfeec7-26c3-4f65-8195-f00f141928bc";
+
+const login = document.getElementById("login");
+const dashboard = document.getElementById("dashboard");
+const message = document.getElementById("message");
+const entries = document.getElementById("entries");
+
+async function checkSession(){
+const {data:{session}} = await supabase.auth.getSession();
+
+if(session){
+if(session.user.id !== ADMIN_ID){
+await supabase.auth.signOut();
+return;
+}
+showDashboard(session.user.email);
+}
+}
+
+function showDashboard(email){
+login.classList.add("hidden");
+dashboard.classList.remove("hidden");
+document.getElementById("welcome").textContent =
+"Hoş geldin " + email;
+loadQuestions();
+}
+
+document.getElementById("loginBtn").onclick = async()=>{
+const email = document.getElementById("email").value.trim();
+const password = document.getElementById("password").value;
+
+message.textContent = "Giriş yapılıyor...";
+
+const {data,error} = await supabase.auth.signInWithPassword({
+email,password
+});
+
+if(error){
+message.textContent = "Giriş başarısız: " + error.message;
+return;
+}
+
+if(data.user.id !== ADMIN_ID){
+await supabase.auth.signOut();
+message.textContent = "Bu hesaba yönetici izni verilmemiş.";
+return;
+}
+
+showDashboard(data.user.email);
+};
+
+async function loadQuestions(){
+entries.textContent = "Sorular yükleniyor...";
+
+const {data,error} = await supabase
+.from("queue")
+.select("id,username,question,completed")
+.order("id",{ascending:true});
+
+if(error){
+entries.textContent = "Sorular yüklenemedi: " + error.message;
+return;
+}
+
+entries.innerHTML = "";
+
+if(!data.length){
+entries.textContent = "Henüz sırada kimse yok.";
+return;
+}
+
+data.forEach(item=>{
+const box = document.createElement("div");
+box.className = "entry";
+
+const name = document.createElement("strong");
+name.textContent = item.username;
+
+const question = document.createElement("p");
+question.textContent = item.question;
+
+const number = document.createElement("div");
+number.className = "small";
+number.textContent = "Sıra #" + item.id;
+
+const status = document.createElement("div");
+status.className = "small";
+status.textContent = item.completed ? "Tamamlandı" : "Bekliyor";
+
+const btn = document.createElement("button");
+btn.textContent = item.completed ? "BEKLİYOR YAP" : "TAMAMLANDI";
+
+btn.onclick = async()=>{
+btn.disabled = true;
+
+const {error} = await supabase
+.from("queue")
+.update({completed:!item.completed})
+.eq("id",item.id);
+
+if(error){
+alert("Güncelleme başarısız: " + error.message);
+btn.disabled = false;
+return;
+}
+
+loadQuestions();
+};
+
+box.append(number,name,question,status,btn);
+entries.appendChild(box);
+});
+}
+
+document.getElementById("refresh").onclick = loadQuestions;
+
+document.getElementById("logout").onclick = async()=>{
+await supabase.auth.signOut();
+dashboard.classList.add("hidden");
+login.classList.remove("hidden");
+};
+
+checkSession();
+</script>
+</body>
+</html>
