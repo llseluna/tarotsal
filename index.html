@@ -221,39 +221,69 @@ button:active {
 
 </div>
 
-<script>
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+const SUPABASE_URL = "https://rxcjcnrhbeekpnoybmcc.supabase.co";
+const SUPABASE_KEY = "sb_publishable_mCBKaVjUDhU-lSwnnbheWw_TO93nm4n";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const form = document.getElementById("queueForm");
 
-form.addEventListener("submit", function(e) {
+form.addEventListener("submit", async function(e) {
   e.preventDefault();
 
   const username = document.getElementById("username").value.trim();
   const question = document.getElementById("question").value.trim();
+  const button = form.querySelector("button");
 
   if (!username || !question) return;
 
-  let queue = JSON.parse(localStorage.getItem("sqQueue") || "[]");
+  button.disabled = true;
+  button.textContent = "GÖNDERİLİYOR...";
 
-  const exists = queue.some(
-    item => item.username.toLowerCase() === username.toLowerCase()
-  );
+  try {
+    const { data: existing, error: checkError } = await supabase
+      .from("queue")
+      .select("id")
+      .ilike("username", username)
+      .limit(1);
 
-  if (exists) {
-    alert("Bu kullanıcı adı zaten sırada!");
-    return;
+    if (checkError) throw checkError;
+
+    if (existing.length > 0) {
+      alert("Bu kullanıcı adı zaten sırada!");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("queue")
+      .insert({ username, question })
+      .select("id")
+      .single();
+
+    if (error) throw error;
+
+    const { count, error: countError } = await supabase
+      .from("queue")
+      .select("id", { count: "exact", head: true })
+      .lte("id", data.id);
+
+    if (countError) throw countError;
+
+    document.getElementById("number").textContent = "#" + count;
+    document.getElementById("result").style.display = "block";
+
+    form.reset();
+
+  } catch (error) {
+    console.error(error);
+    alert("Bir hata oluştu. Lütfen tekrar dene.");
+  } finally {
+    button.disabled = false;
+    button.textContent = "SIRAYA KATIL";
   }
-
-  queue.push({
-    username: username,
-    question: question
-  });
-
-  localStorage.setItem("sqQueue", JSON.stringify(queue));
-
-  document.getElementById("number").textContent = "#" + queue.length;
-  document.getElementById("result").style.display = "block";
-
-  form.reset();
 });
 </script>
 
