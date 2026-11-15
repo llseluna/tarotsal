@@ -4,135 +4,225 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SQ Project</title>
+<title>Tarotsal | Tarot Sırası</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
 * {
   box-sizing: border-box;
 }
+
 body {
   margin: 0;
   min-height: 100vh;
-  background: #111116;
-  color: #f5f1fa;
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 24px;
+  background:
+    radial-gradient(ellipse at 50% 0%, #39234f 0%, transparent 55%),
+    #100d16;
+  color: #f4eafa;
+  font-family: 'Inter', sans-serif;
+  padding: 25px 16px;
 }
+
 .container {
-  width: 100%;
-  max-width: 420px;
-  background: #1c1b24;
-  padding: 30px 22px;
-  border: 1px solid #393342;
-  border-radius: 22px;
+  max-width: 440px;
+  margin: 35px auto;
 }
-.tag {
-  color: #c5a5ef;
-  font-size: 12px;
-  letter-spacing: 3px;
+
+.header {
   text-align: center;
+  margin-bottom: 35px;
 }
-h1 {
+
+.symbol {
+  color: #c6a1e6;
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 48px;
+  letter-spacing: 4px;
+  margin: 0;
+  font-weight: 600;
+}
+
+.subtitle {
+  color: #b49bbf;
+  font-size: 11px;
+  letter-spacing: 4px;
+  margin-top: 9px;
+}
+
+.line {
+  width: 75px;
+  height: 1px;
+  background: #9870b1;
+  margin: 22px auto;
+}
+
+.card {
+  background: rgba(31, 23, 40, .94);
+  border: 1px solid #59436b;
+  border-radius: 18px;
+  padding: 27px 22px;
+  box-shadow: 0 15px 45px #0005;
+}
+
+.card h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 29px;
+  font-weight: 500;
   text-align: center;
-  font-size: 32px;
-  margin: 15px 0 8px;
+  margin: 0 0 10px;
 }
-.description {
+
+.info {
   text-align: center;
-  color: #aaa3b5;
-  line-height: 1.6;
-  font-size: 14px;
-  margin-bottom: 28px;
+  color: #b7a6c1;
+  font-size: 13px;
+  line-height: 1.7;
+  margin-bottom: 25px;
 }
+
 label {
   display: block;
-  margin: 16px 0 8px;
-  font-size: 13px;
-  color: #d8cce7;
+  color: #d8c2e7;
+  font-size: 12px;
+  margin: 18px 0 9px;
 }
+
 input, textarea {
   width: 100%;
+  background: #15101c;
+  border: 1px solid #51405e;
+  border-radius: 10px;
   padding: 14px;
-  border: 1px solid #494151;
-  background: #111116;
   color: white;
-  border-radius: 11px;
-  font-size: 15px;
+  font-size: 14px;
   outline: none;
+  font-family: inherit;
 }
+
+input:focus, textarea:focus {
+  border-color: #bd91dc;
+}
+
 textarea {
+  min-height: 110px;
   resize: vertical;
-  min-height: 105px;
 }
+
+input::placeholder, textarea::placeholder {
+  color: #83758c;
+}
+
 button {
   width: 100%;
+  margin-top: 23px;
   padding: 15px;
-  margin-top: 20px;
-  border: 0;
-  border-radius: 11px;
-  background: #b99ade;
-  color: #17121d;
-  font-weight: bold;
-  font-size: 15px;
+  border: 1px solid #c4a0df;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #8d62a8, #58366f);
+  color: white;
+  font-size: 13px;
+  letter-spacing: 2px;
+  font-weight: 600;
+  cursor: pointer;
 }
+
 button:active {
   opacity: .8;
 }
+
 #result {
   display: none;
-  margin-top: 22px;
-  padding: 18px;
   text-align: center;
-  border-radius: 13px;
-  background: #30263b;
+  margin-top: 22px;
+  padding: 20px;
+  border: 1px solid #80619a;
+  border-radius: 12px;
+  background: #291c35;
+  color: #dfc9ee;
 }
+
 #number {
   display: block;
-  font-size: 38px;
-  color: #d5b7ff;
-  margin: 10px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 55px;
+  color: #e1c2f6;
+  margin: 8px;
 }
+
 .footer {
   text-align: center;
-  color: #777181;
+  color: #786982;
   font-size: 11px;
-  margin-top: 25px;
+  letter-spacing: 2px;
+  margin-top: 27px;
 }
+
 </style>
 </head>
+
 <body>
 
 <div class="container">
-  <div class="tag">SQ PROJECT</div>
-  <h1>Soru Sırası</h1>
-  <p class="description">
-    Sorunu gönder ve sıradaki yerini öğren
-  </p>
 
-  <form id="queueForm">
-    <label>Kullanıcı adın</label>
-    <input id="username" placeholder="Kullanıcı adını yaz" maxlength="25" required>
+  <header class="header">
+    <div class="symbol">☾</div>
+    <h1 class="brand">TAROTSAL</h1>
+    <div class="subtitle">THE ART OF TAROT</div>
+    <div class="line"></div>
+  </header>
 
-    <label>Sorun</label>
-    <textarea id="question" placeholder="Sorunu buraya yaz..." maxlength="500" required></textarea>
+  <main class="card">
+    <h2>Tarot Sırasına Katıl</h2>
 
-    <button type="submit">Sıraya Katıl</button>
-  </form>
+    <p class="info">
+      İçinden geçen soruyu evrene bırak<br>
+      Sıranı oluştur ve beklemeye başla
+    </p>
 
-  <div id="result">
-    Sıraya başarıyla eklendin
-    <span id="number">#1</span>
-    <small>Sıra numaran</small>
-  </div>
+    <form id="queueForm">
 
-  <div class="footer">SQ PROJECT · 2026</div>
+      <label>Kullanıcı adın</label>
+      <input
+        id="username"
+        type="text"
+        placeholder="Kullanıcı adını yaz..."
+        maxlength="25"
+        required
+      >
+
+      <label>Tarot sorun</label>
+      <textarea
+        id="question"
+        placeholder="Merak ettiğin soruyu buraya yaz..."
+        maxlength="500"
+        required
+      ></textarea>
+
+      <button type="submit">SIRAYA KATIL</button>
+
+    </form>
+
+    <div id="result">
+      Sıran başarıyla oluşturuldu
+      <span id="number">#1</span>
+      <small>SIRA NUMARAN</small>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    ✧ TAROTSAL ✧
+  </footer>
+
 </div>
 
 <script>
 const form = document.getElementById("queueForm");
-const result = document.getElementById("result");
 
 form.addEventListener("submit", function(e) {
   e.preventDefault();
@@ -161,7 +251,8 @@ form.addEventListener("submit", function(e) {
   localStorage.setItem("sqQueue", JSON.stringify(queue));
 
   document.getElementById("number").textContent = "#" + queue.length;
-  result.style.display = "block";
+  document.getElementById("result").style.display = "block";
+
   form.reset();
 });
 </script>
